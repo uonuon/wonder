@@ -67,9 +67,10 @@ src/
       style.tsx            # character + scene shop (buy/equip with "drops")
       settings.tsx         # sound/notifs/haptics, EN/ع, daily goal, reset
   components/
-    Companion.tsx          # animated character (3 sine waves + grounding shadow + celebrate)
+    Companion.tsx          # animated character (3 sine waves + optional shadow + celebrate)
     BuildScene.tsx         # the focus scene: bg + wonder revealed bottom-up + worker + char
-    ui.tsx                 # Txt, Btn, Card, Icon, ProgressBar primitives
+    Sky.tsx                # SVG sky backdrop + puffy clouds + CloudBase (Focus-Friend world)
+    ui.tsx                 # Txt, Btn (sticker), Card, Toggle, Pill, Icon, ProgressBar
   lib/
     store.ts               # zustand + persist (AsyncStorage) — all state & actions
     wonders.ts             # 8 wonders, stones↔seconds math, progress derivation
@@ -86,6 +87,22 @@ docs/screenshots/          # curated screenshots used in this README
 ```
 
 ---
+
+## Design system (Focus-Friend look)
+
+The UI follows *Focus Friend*'s cozy, gamified style, themed for our pyramid world:
+- **Sky world** — soft cyan background with hand-drawn SVG clouds (`Sky.tsx`); the character
+  stands on a cloud. No background image assets.
+- **Sticker buttons** (`Btn` in `ui.tsx`) — chunky cream/green/coral faces with a thick maroon
+  outline and a maroon bottom lip that compresses on press. `kind`: `cream` | `primary`
+  (green) | `danger` (coral) | `plain`.
+- **Cream cards** with maroon borders; **green pill `Toggle`s** with a cream knob; white
+  **`Pill`** counters for streak/drops.
+- **Type** — Cairo at three weights (`@expo-google-fonts/cairo`): 400 body, 700 bold, **900
+  black** for the chunky marker headings/buttons. Arabic-safe. Tokens live in `lib/theme.ts`
+  (`C` palette, `FONT`/`FONT_BOLD`/`FONT_BLACK`, `STROKE`, `R`, `SP`).
+- Palette: sky `#A9E2F0`, cream `#F5E9C8`, maroon outline `#5B2A20`, green `#8FC63D`,
+  coral `#E5705F`, toggle-on `#C3D85B`.
 
 ## How the core works
 

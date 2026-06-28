@@ -36,6 +36,8 @@ export type State = {
   langPicked: boolean;      // true once locale auto-detected or user chose a language
   soundOn: boolean;
   notificationsOn: boolean;
+  reminderHour: number;     // daily reminder time (0-23)
+  reminderMinute: number;   // (0 or 30)
   hapticsOn: boolean;
   // actions
   initLocale: (deviceLang: 'en' | 'ar') => void;
@@ -56,7 +58,8 @@ const initial = {
   onboarded: false, builderName: '', dailyGoalMin: 60,
   equippedCharacter: 'pharaoh', ownedCharacters: ['pharaoh', 'builder'],
   equippedScene: 'auto', ownedScenes: ['auto', 'giza'],
-  plus: false, lang: 'en' as const, langPicked: false, soundOn: true, notificationsOn: true, hapticsOn: true,
+  plus: false, lang: 'en' as const, langPicked: false, soundOn: true, notificationsOn: true,
+  reminderHour: 20, reminderMinute: 0, hapticsOn: true,
 };
 
 export const useStore = create<State>()(

@@ -3,11 +3,12 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Companion } from '@/components/Companion';
-import { Btn, Txt } from '@/components/ui';
+import { CloudBase, SkyBackground } from '@/components/Sky';
+import { Btn, Pill, Txt } from '@/components/ui';
 import { num, t } from '@/lib/i18n';
 import { useProgress, useStore } from '@/lib/store';
 import { wonderName } from '@/lib/wonders';
-import { C, R } from '@/lib/theme';
+import { C, R, STROKE } from '@/lib/theme';
 
 const PRESETS = [5, 15, 25, 50];
 
@@ -25,54 +26,70 @@ export default function Home() {
 
   function chip(key: string, label: string, on: boolean, onPress: () => void) {
     return (
-      <Pressable key={key} onPress={onPress} style={{ height: 44, paddingHorizontal: 16, borderRadius: R.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? C.gold : C.card, borderWidth: 1.5, borderColor: on ? C.goldDk : C.line }}>
-        <Txt size={16} color={on ? C.ink : C.text}>{label}</Txt>
+      <Pressable key={key} onPress={onPress} style={{
+        height: 46, minWidth: 52, paddingHorizontal: 16, borderRadius: R.pill, alignItems: 'center', justifyContent: 'center',
+        backgroundColor: on ? C.green : C.cream, borderWidth: STROKE, borderColor: C.maroon,
+      }}>
+        <Txt size={16} weight="900" color={C.maroon}>{label}</Txt>
       </Pressable>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
-      {/* header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingTop: 8 }}>
-        <Txt size={17} color={C.terra}>🔥 {num(streak)}</Txt>
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <View style={{ backgroundColor: C.card, borderRadius: R.pill, paddingHorizontal: 14, paddingVertical: 6 }}>
-            <Txt size={14} color={C.ink}>{wonderName(prog.wonder, lang)} · {num(prog.inWonder)}/{num(prog.needed)}</Txt>
+    <View style={{ flex: 1 }}>
+      <SkyBackground>
+        <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+          {/* header: streak + drops */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 6 }}>
+            <Pill icon="🔥" value={num(streak)} />
+            <View style={{ flex: 1 }} />
+            <Pill icon="💧" value={num(coins)} />
           </View>
-        </View>
-        <Txt size={17} color={C.teal}>💧 {num(coins)}</Txt>
-      </View>
 
-      {/* companion */}
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Companion size={290} />
-      </View>
+          {/* wonder banner */}
+          <View style={{ alignItems: 'center', marginTop: 10 }}>
+            <View style={{ backgroundColor: C.white, borderRadius: R.pill, borderWidth: STROKE, borderColor: C.maroon, paddingHorizontal: 16, height: 40, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Txt size={15} weight="900" color={C.maroon}>🏛️ {wonderName(prog.wonder, lang)}</Txt>
+              <Txt size={14} weight="900" color={C.greenDk}>{num(prog.inWonder)}/{num(prog.needed)}</Txt>
+            </View>
+          </View>
 
-      {/* controls */}
-      <View style={{ alignItems: 'center', paddingBottom: 18 }}>
-        <Txt size={50} color={C.ink}>{String(minutes).padStart(2, '0')}:00</Txt>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4, marginBottom: 14 }}>
-          <Txt size={15} color={C.teal}>{pomo ? `25 / 5 ${t('min_short')}` : t('pick_len')}</Txt>
-          <Pressable onPress={() => setPomo(!pomo)}>
-            <Txt size={14} color={pomo ? C.terra : C.mute}>⏳ {t('pomodoro')}</Txt>
-          </Pressable>
-        </View>
-        {!pomo && (
-          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 18, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {PRESETS.map((m) => chip('p' + m, String(m), !custom && sel === m, () => { setSel(m); setCustom(0); }))}
-            {chip('custom', t('custom'), custom > 0, () => setCustom(custom ? 0 : 30))}
+          {/* companion standing on a cloud */}
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ alignItems: 'center', justifyContent: 'flex-end' }}>
+              <View style={{ position: 'absolute', bottom: -8 }}>
+                <CloudBase width={260} />
+              </View>
+              <Companion size={250} shadow={false} />
+            </View>
           </View>
-        )}
-        {custom > 0 && !pomo && (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 14 }}>
-            <Btn label="−" size="md" bg={C.cardDk} color={C.ink} onPress={() => setCustom(Math.max(5, custom - 5))} style={{ width: 48 }} />
-            <Txt size={20} color={C.greenDk}>{custom} {t('min_short')}</Txt>
-            <Btn label="+" size="md" bg={C.cardDk} color={C.ink} onPress={() => setCustom(Math.min(120, custom + 5))} style={{ width: 48 }} />
+
+          {/* controls */}
+          <View style={{ alignItems: 'center', paddingBottom: 14 }}>
+            <Txt size={56} weight="900" color={C.ink}>{String(minutes).padStart(2, '0')}:00</Txt>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 2, marginBottom: 14 }}>
+              <Txt size={14} weight="700" color={C.maroonSoft}>{pomo ? `25 / 5 ${t('min_short')}` : t('pick_len')}</Txt>
+              <Pressable onPress={() => setPomo(!pomo)} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, opacity: pomo ? 1 : 0.6 }}>
+                <Txt size={14} weight="900" color={pomo ? C.coral : C.maroonSoft}>⏳ {t('pomodoro')}</Txt>
+              </Pressable>
+            </View>
+            {!pomo && (
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16, flexWrap: 'wrap', justifyContent: 'center', paddingHorizontal: 16 }}>
+                {PRESETS.map((m) => chip('p' + m, num(m), !custom && sel === m, () => { setSel(m); setCustom(0); }))}
+                {chip('custom', t('custom'), custom > 0, () => setCustom(custom ? 0 : 30))}
+              </View>
+            )}
+            {custom > 0 && !pomo && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                <Btn label="−" size="sm" onPress={() => setCustom(Math.max(5, custom - 5))} style={{ width: 48 }} />
+                <Txt size={20} weight="900" color={C.greenDk}>{num(custom)} {t('min_short')}</Txt>
+                <Btn label="+" size="sm" onPress={() => setCustom(Math.min(120, custom + 5))} style={{ width: 48 }} />
+              </View>
+            )}
+            <Btn label={t('start')} kind="primary" onPress={() => router.push({ pathname: '/focus', params: { min: String(minutes), pomo: pomo ? '1' : '0' } })} style={{ width: 320 }} />
           </View>
-        )}
-        <Btn label={t('start')} onPress={() => router.push({ pathname: '/focus', params: { min: String(minutes), pomo: pomo ? '1' : '0' } })} style={{ width: 320 }} />
-      </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      </SkyBackground>
+    </View>
   );
 }

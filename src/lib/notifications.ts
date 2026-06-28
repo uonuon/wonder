@@ -4,10 +4,9 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { t } from './i18n';
+import { useStore } from './store';
 
 const DAILY_ID = 'tarkeez-daily-reminder';
-const REMINDER_HOUR = 20;   // 8:00 PM local — gentle evening nudge
-const REMINDER_MINUTE = 0;
 
 // Surface notifications even while the app is foregrounded.
 Notifications.setNotificationHandler({
@@ -39,14 +38,15 @@ export async function scheduleDailyReminder(): Promise<boolean> {
   const ok = await ensurePermission();
   if (!ok) return false;
   try {
+    const { reminderHour, reminderMinute } = useStore.getState();
     await cancelDailyReminder();
     await Notifications.scheduleNotificationAsync({
       identifier: DAILY_ID,
       content: { title: t('notif_title'), body: t('notif_body') },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour: REMINDER_HOUR,
-        minute: REMINDER_MINUTE,
+        hour: reminderHour,
+        minute: reminderMinute,
       },
     });
     return true;

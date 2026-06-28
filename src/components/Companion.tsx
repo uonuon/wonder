@@ -15,7 +15,7 @@ import { useStore } from '@/lib/store';
 
 const AImage = Animated.createAnimatedComponent(Image);
 
-export function Companion({ size = 240, celebrate = false }: { size?: number; celebrate?: boolean }) {
+export function Companion({ size = 240, celebrate = false, shadow = true }: { size?: number; celebrate?: boolean; shadow?: boolean }) {
   const id = useStore((s) => s.equippedCharacter);
   const tex = character(id).tex;
 
@@ -63,12 +63,14 @@ export function Companion({ size = 240, celebrate = false }: { size?: number; ce
 
   return (
     <View style={{ width: size, height: size * 1.04, alignItems: 'center', justifyContent: 'flex-end' }}>
-      <Animated.View
-        style={[
-          { position: 'absolute', bottom: size * 0.015, width: size * 0.52, height: size * 0.08, borderRadius: size * 0.04, backgroundColor: '#000' },
-          shadowStyle,
-        ]}
-      />
+      {shadow && (
+        <Animated.View
+          style={[
+            { position: 'absolute', bottom: size * 0.015, width: size * 0.52, height: size * 0.08, borderRadius: size * 0.04, backgroundColor: '#000' },
+            shadowStyle,
+          ]}
+        />
+      )}
       <AImage source={img(tex)} style={[{ width: size, height: size, resizeMode: 'contain' }, charStyle]} />
     </View>
   );

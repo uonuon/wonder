@@ -2,20 +2,25 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card, Icon, Txt } from '@/components/ui';
+import { Btn, Card, Icon, Toggle, Txt } from '@/components/ui';
 import { img } from '@/lib/assets';
-import { t } from '@/lib/i18n';
+import { num, t } from '@/lib/i18n';
 import { cancelDailyReminder, scheduleDailyReminder } from '@/lib/notifications';
 import { useStore } from '@/lib/store';
-import { C, R } from '@/lib/theme';
+import { C, R, STROKE } from '@/lib/theme';
+
+function fmtTime(h: number, m: number, ar: boolean) {
+  let hh = h % 12; if (hh === 0) hh = 12;
+  const mm = String(m).padStart(2, '0');
+  if (ar) return `${num(hh)}:${num(mm)} ${h < 12 ? 'ص' : 'م'}`;
+  return `${hh}:${mm} ${h < 12 ? 'AM' : 'PM'}`;
+}
 
 export default function Settings() {
   const router = useRouter();
   const s = useStore();
   const [armed, setArmed] = useState(false);
 
-  // Toggle notifications: enabling schedules the daily reminder and reverts if the OS
-  // denies permission, so the switch never lies about its state.
   async function toggleNotifications() {
     if (s.notificationsOn) {
       s.set({ notificationsOn: false });
@@ -27,64 +32,94 @@ export default function Settings() {
     }
   }
 
-  function row(icon: string, label: string, right: React.ReactNode) {
+  function stepReminder(delta: number) {
+    const total = (s.reminderHour * 60 + s.reminderMinute + delta + 1440) % 1440;
+    s.set({ reminderHour: Math.floor(total / 60), reminderMinute: total % 60 });
+    if (s.notificationsOn) scheduleDailyReminder();
+  }
+
+  // a labelled row inside a card
+  function Row({ icon, label, right, sub }: { icon: string; label: string; right: React.ReactNode; sub?: string }) {
     return (
-      <Card style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingVertical: 14 }}>
-        <Txt size={17} color={C.ink} style={{ flex: 1 }}>{icon} {label}</Txt>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12 }}>
+        <View style={{ flex: 1 }}>
+          <Txt size={17} color={C.ink}>{icon}  {label}</Txt>
+          {sub ? <Txt size={12} weight="400" color={C.mute} style={{ marginTop: 2 }}>{sub}</Txt> : null}
+        </View>
         {right}
-      </Card>
+      </View>
     );
   }
-  function toggle(on: boolean, onPress: () => void) {
+  function Divider() {
+    return <View style={{ height: STROKE, backgroundColor: C.line, marginHorizontal: -4, borderRadius: 2 }} />;
+  }
+  function Stepper({ onMinus, onPlus, children }: { onMinus: () => void; onPlus: () => void; children: React.ReactNode }) {
     return (
-      <Pressable onPress={onPress} style={{ width: 84, height: 34, borderRadius: R.pill, backgroundColor: on ? C.greenDk : C.cardDk, alignItems: 'center', justifyContent: 'center' }}>
-        <Txt size={15} color={on ? '#FFFBF2' : C.mute}>{on ? t('on') : t('off')}</Txt>
-      </Pressable>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <Btn label="−" size="sm" onPress={onMinus} style={{ width: 44 }} />
+        <View style={{ minWidth: 78, alignItems: 'center' }}>{children}</View>
+        <Btn label="+" size="sm" onPress={onPlus} style={{ width: 44 }} />
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 24 }}>
-        <Txt size={28} color={C.ink} style={{ marginBottom: 14 }}>{t('nav_settings')}</Txt>
+    <SafeAreaView style={{ flex: 1, backgroundColor: C.sky }} edges={['top']}>
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 28 }}>
+        <Txt size={30} weight="900" color={C.ink} style={{ marginBottom: 14, marginLeft: 4 }}>{t('nav_settings')}</Txt>
 
-        {row('🔊', t('sound'), toggle(s.soundOn, () => s.set({ soundOn: !s.soundOn })))}
-        {row('🔔', t('notifications'), toggle(s.notificationsOn, toggleNotifications))}
-        {row('📳', t('haptics'), toggle(s.hapticsOn, () => s.set({ hapticsOn: !s.hapticsOn })))}
-        {row('🌐', t('language'), (
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Pressable onPress={() => s.set({ lang: 'en', langPicked: true })} style={{ paddingHorizontal: 16, height: 34, borderRadius: R.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: s.lang === 'en' ? C.gold : C.cardDk }}><Txt size={14} color={C.ink}>EN</Txt></Pressable>
-            <Pressable onPress={() => s.set({ lang: 'ar', langPicked: true })} style={{ paddingHorizontal: 16, height: 34, borderRadius: R.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: s.lang === 'ar' ? C.gold : C.cardDk }}><Txt size={16} color={C.ink}>ع</Txt></Pressable>
-          </View>
-        ))}
-        {row('🎯', t('day_goal'), (
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <Pressable onPress={() => s.set({ dailyGoalMin: Math.max(15, s.dailyGoalMin - 15) })} style={{ width: 40, height: 34, borderRadius: 10, backgroundColor: C.cardDk, alignItems: 'center', justifyContent: 'center' }}><Txt size={20} color={C.ink}>−</Txt></Pressable>
-            <Txt size={15} color={C.greenDk}>{s.dailyGoalMin}{t('min_short')}</Txt>
-            <Pressable onPress={() => s.set({ dailyGoalMin: Math.min(480, s.dailyGoalMin + 15) })} style={{ width: 40, height: 34, borderRadius: 10, backgroundColor: C.cardDk, alignItems: 'center', justifyContent: 'center' }}><Txt size={20} color={C.ink}>+</Txt></Pressable>
-          </View>
-        ))}
+        <Card style={{ marginBottom: 14 }}>
+          <Row icon="🔊" label={t('sound')} right={<Toggle on={s.soundOn} onPress={() => s.set({ soundOn: !s.soundOn })} />} />
+          <Divider />
+          <Row icon="🔔" label={t('notifications')} right={<Toggle on={s.notificationsOn} onPress={toggleNotifications} />} />
+          {s.notificationsOn && (
+            <>
+              <Divider />
+              <Row icon="⏰" label={t('reminder_time')} right={
+                <Stepper onMinus={() => stepReminder(-30)} onPlus={() => stepReminder(30)}>
+                  <Txt size={16} weight="900" color={C.greenDk}>{fmtTime(s.reminderHour, s.reminderMinute, s.lang === 'ar')}</Txt>
+                </Stepper>
+              } />
+            </>
+          )}
+          <Divider />
+          <Row icon="📳" label={t('haptics')} right={<Toggle on={s.hapticsOn} onPress={() => s.set({ hapticsOn: !s.hapticsOn })} />} />
+        </Card>
+
+        <Card style={{ marginBottom: 14 }}>
+          <Row icon="🌐" label={t('language')} right={
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Pressable onPress={() => s.set({ lang: 'en', langPicked: true })} style={{ paddingHorizontal: 16, height: 36, borderRadius: R.pill, borderWidth: STROKE, borderColor: C.maroon, alignItems: 'center', justifyContent: 'center', backgroundColor: s.lang === 'en' ? C.toggleOn : C.cream }}><Txt size={14} weight="900" color={C.maroon}>EN</Txt></Pressable>
+              <Pressable onPress={() => s.set({ lang: 'ar', langPicked: true })} style={{ paddingHorizontal: 16, height: 36, borderRadius: R.pill, borderWidth: STROKE, borderColor: C.maroon, alignItems: 'center', justifyContent: 'center', backgroundColor: s.lang === 'ar' ? C.toggleOn : C.cream }}><Txt size={16} weight="900" color={C.maroon}>ع</Txt></Pressable>
+            </View>
+          } />
+          <Divider />
+          <Row icon="🎯" label={t('day_goal')} right={
+            <Stepper onMinus={() => s.set({ dailyGoalMin: Math.max(15, s.dailyGoalMin - 15) })} onPlus={() => s.set({ dailyGoalMin: Math.min(480, s.dailyGoalMin + 15) })}>
+              <Txt size={16} weight="900" color={C.greenDk}>{num(s.dailyGoalMin)} {t('min_short')}</Txt>
+            </Stepper>
+          } />
+        </Card>
 
         {/* Tarkeez+ */}
         <Pressable onPress={() => !s.plus && router.push('/paywall')}>
-          <Card style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, backgroundColor: '#FCF6E8' }}>
-            <Icon src={img('ic_crown')} size={28} color={C.goldDk} />
+          <Card style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: '#FBF1D4' }}>
+            <Icon src={img('ic_crown')} size={30} color={C.goldDk} />
             <View style={{ flex: 1, paddingLeft: 12 }}>
-              <Txt size={18} color={C.ink}>{t('plus_title')}</Txt>
-              <Txt size={12} color={C.mute} style={{ marginTop: 2 }}>{s.plus ? `${t('plus_title')} ✦` : t('plus_tag')}</Txt>
+              <Txt size={18} weight="900" color={C.ink}>{t('plus_title')}</Txt>
+              <Txt size={12} weight="400" color={C.mute} style={{ marginTop: 2 }}>{s.plus ? `${t('plus_title')} ✦` : t('plus_tag')}</Txt>
             </View>
-            {!s.plus && <View style={{ backgroundColor: C.goldDk, borderRadius: R.pill, paddingHorizontal: 16, height: 38, alignItems: 'center', justifyContent: 'center' }}><Txt size={15} color="#FFF8E6">{t('subscribe')}</Txt></View>}
+            {!s.plus && <Btn label={t('subscribe')} size="sm" kind="primary" upper={false} onPress={() => router.push('/paywall')} />}
           </Card>
         </Pressable>
 
-        <Pressable
-          onPress={() => { if (!armed) setArmed(true); else { s.reset(); setArmed(false); } }}
-          style={{ marginTop: 24, alignSelf: 'center', backgroundColor: C.terra, borderRadius: R.pill, paddingHorizontal: 28, height: 46, alignItems: 'center', justifyContent: 'center' }}>
-          <Txt size={16} color="#FFFBF2">{armed ? t('reset_confirm') : t('reset')}</Txt>
-        </Pressable>
+        <View style={{ alignSelf: 'center' }}>
+          <Btn label={armed ? t('reset_confirm') : t('reset')} kind="danger" size="md"
+            onPress={() => { if (!armed) setArmed(true); else { s.reset(); setArmed(false); } }} />
+        </View>
 
-        <Txt size={13} color={C.mute} center style={{ marginTop: 22 }}>{t('about')}</Txt>
-        <Txt size={12} color={C.mute} center style={{ marginTop: 4 }}>{t('version')} 1.0</Txt>
+        <Txt size={13} weight="400" color={C.maroonSoft} center style={{ marginTop: 22 }}>{t('about')}</Txt>
+        <Txt size={12} weight="400" color={C.mute} center style={{ marginTop: 4 }}>{t('version')} 1.0</Txt>
       </ScrollView>
     </SafeAreaView>
   );

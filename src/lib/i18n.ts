@@ -68,6 +68,10 @@ const S: Record<string, Pair> = {
   // notifications
   notif_title: ['Your wonder is waiting 🏛️', 'أثرك في انتظارك 🏛️'],
   notif_body: ['Take a focus session and lay a few more stones today.', 'خُذ جلسة تركيز وضَع بعض الأحجار اليوم.'],
+  reminder_time: ['Reminder time', 'وقت التذكير'],
+  // home
+  greeting: ['Ready to build?', 'جاهز للبناء؟'],
+  tap_start: ['Pick a length and focus', 'اختر مدة وابدأ التركيز'],
   // plus
   plus_title: ['Tarkeez+', 'تركيز+'],
   plus_tag: ['Build faster. Unlock more.', 'ابنِ أسرع. افتح المزيد.'],

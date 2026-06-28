@@ -5,7 +5,7 @@ import { img } from '@/lib/assets';
 import { num, t } from '@/lib/i18n';
 import { dateOffset, today, useStore } from '@/lib/store';
 import { progressFor, stonesFromSeconds, wonderForStones, WONDERS, wonderName } from '@/lib/wonders';
-import { C, R } from '@/lib/theme';
+import { C, STROKE } from '@/lib/theme';
 
 function fmt(sec: number) {
   const m = Math.floor(sec / 60);
@@ -30,20 +30,20 @@ export default function Stats() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 24 }}>
-        <Txt size={28} color={C.ink} style={{ marginBottom: 14 }}>{t('nav_stats')}</Txt>
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 24 }}>
+        <Txt size={30} weight="900" color={C.ink} style={{ marginBottom: 14, marginLeft: 4 }}>{t('nav_stats')}</Txt>
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          {[[t('total_focus'), fmt(s.totalFocusSec), C.greenDk], [t('streak'), `${num(s.streak)}🔥`, C.terra], [t('best_streak'), num(s.bestStreak), C.gold]].map(([label, val, col], i) => (
+          {[[t('total_focus'), fmt(s.totalFocusSec), C.greenDk], [t('streak'), `${num(s.streak)}🔥`, C.coralDk], [t('best_streak'), num(s.bestStreak), C.goldDk]].map(([label, val, col], i) => (
             <Card key={i} style={{ flex: 1, alignItems: 'center', paddingVertical: 14 }}>
-              <Txt size={20} color={col as string}>{val}</Txt>
-              <Txt size={12} color={C.mute} style={{ marginTop: 4 }}>{label}</Txt>
+              <Txt size={21} weight="900" color={col as string}>{val}</Txt>
+              <Txt size={12} weight="700" color={C.mute} style={{ marginTop: 4 }}>{label}</Txt>
             </Card>
           ))}
         </View>
 
         <Card style={{ marginTop: 12 }}>
-          <Txt size={17} color={C.ink}>{t('wonder')} {num(prog.idx + 1)} · {wonderName(prog.wonder, s.lang)}</Txt>
+          <Txt size={18} weight="900" color={C.ink}>{t('wonder')} {num(prog.idx + 1)} · {wonderName(prog.wonder, s.lang)}</Txt>
           <View style={{ height: 10 }} />
           <ProgressBar frac={prog.frac} />
           <Txt size={13} color={C.mute} style={{ marginTop: 8 }}>{num(prog.inWonder)} / {num(prog.needed)} {t('stones')}</Txt>
@@ -58,24 +58,24 @@ export default function Stats() {
           <ProgressBar frac={s.dailyGoalMin ? s.todayFocusSec / (s.dailyGoalMin * 60) : 1} color={C.gold} />
         </Card>
 
-        <Txt size={16} color={C.ink} style={{ marginTop: 18, marginBottom: 10 }}>{t('this_weeks')}</Txt>
+        <Txt size={17} weight="900" color={C.ink} style={{ marginTop: 18, marginBottom: 10, marginLeft: 4 }}>{t('this_weeks')}</Txt>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
           {days.map((d) => {
             const sec = s.history[d] ?? 0;
             const lv = sec > 0 ? Math.max(0.18, Math.min(1, sec / maxSec)) : 0;
-            const bg = sec > 0 ? mix('#D6E2C8', C.greenDk, lv) : C.cardDk;
-            return <View key={d} style={{ width: '12%', aspectRatio: 1, borderRadius: 8, backgroundColor: bg, borderWidth: d === today() ? 2 : 0, borderColor: C.gold }} />;
+            const bg = sec > 0 ? mix('#DDEBC4', C.greenDk, lv) : C.cream;
+            return <View key={d} style={{ width: '12%', aspectRatio: 1, borderRadius: 8, backgroundColor: bg, borderWidth: 2, borderColor: d === today() ? C.coral : C.maroon, opacity: sec > 0 || d === today() ? 1 : 0.45 }} />;
           })}
         </View>
 
-        <Txt size={16} color={C.ink} style={{ marginTop: 18, marginBottom: 10 }}>{t('achievements')}</Txt>
+        <Txt size={17} weight="900" color={C.ink} style={{ marginTop: 18, marginBottom: 10, marginLeft: 4 }}>{t('achievements')}</Txt>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           {ach.map((a) => (
             <View key={a.id} style={{ alignItems: 'center', width: '19%' }}>
-              <View style={{ width: 46, height: 46, borderRadius: 999, backgroundColor: a.on ? C.gold : C.cardDk, alignItems: 'center', justifyContent: 'center' }}>
-                <Icon src={img(a.icon)} size={24} color={a.on ? '#FFFBF2' : C.mute} />
+              <View style={{ width: 50, height: 50, borderRadius: 999, backgroundColor: a.on ? C.green : C.cream, borderWidth: STROKE, borderColor: C.maroon, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon src={img(a.icon)} size={24} color={a.on ? C.white : C.mute} />
               </View>
-              <Txt size={10} color={a.on ? C.text : C.mute} center style={{ marginTop: 4 }}>{s.lang === 'ar' ? a.ar : a.en}</Txt>
+              <Txt size={10} weight="700" color={a.on ? C.ink : C.mute} center style={{ marginTop: 5 }}>{s.lang === 'ar' ? a.ar : a.en}</Txt>
             </View>
           ))}
         </View>

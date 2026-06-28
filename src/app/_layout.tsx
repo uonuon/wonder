@@ -1,3 +1,4 @@
+import { Cairo_400Regular, Cairo_700Bold, Cairo_900Black } from '@expo-google-fonts/cairo';
 import { useFonts } from 'expo-font';
 import { getLocales } from 'expo-localization';
 import { Stack } from 'expo-router';
@@ -13,7 +14,11 @@ import { C } from '@/lib/theme';
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
-  const [loaded] = useFonts({ Cairo: require('../../assets/fonts/Cairo-Regular.ttf') });
+  const [loaded] = useFonts({
+    Cairo: Cairo_400Regular,
+    CairoBold: Cairo_700Bold,
+    CairoBlack: Cairo_900Black,
+  });
   const initLocale = useStore((s) => s.initLocale);
   // app is portrait everywhere; the focus scene locks landscape for itself and restores this on exit
   useEffect(() => {

@@ -4,12 +4,12 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { useEffect, useRef, useState } from 'react';
 import { AppState, Platform, Pressable, useWindowDimensions, View } from 'react-native';
 import { BuildScene } from '@/components/BuildScene';
-import { Txt } from '@/components/ui';
+import { Btn, Txt } from '@/components/ui';
 import { num, quote, t } from '@/lib/i18n';
 import { scene as sceneCat } from '@/lib/catalog';
 import { useStore } from '@/lib/store';
 import { progressFor, stonesFromSeconds, STONE_MINUTES, WONDERS } from '@/lib/wonders';
-import { C, R } from '@/lib/theme';
+import { C, R, STROKE } from '@/lib/theme';
 
 function daylight() {
   const h = new Date().getHours() + new Date().getMinutes() / 60;
@@ -87,30 +87,26 @@ export default function Focus() {
       <BuildScene width={width} height={height} bgKey={bgKey} structKey={wonder.struct} frac={liveFrac} charTex={`char_${equippedChar}`} night={night} />
 
       {/* timer HUD */}
-      <View style={{ position: 'absolute', top: 24, width: '100%', alignItems: 'center' }}>
-        <View style={{ backgroundColor: C.hudBg, borderRadius: R.lg, paddingHorizontal: 26, paddingVertical: 8 }}>
-          <Txt size={52} color={C.hudFg}>{mm}:{ss}</Txt>
-        </View>
-        <Txt size={14} color="rgba(245,240,230,0.9)" style={{ marginTop: 6 }}>{t('keep_focus')}</Txt>
+      <View style={{ position: 'absolute', top: 22, width: '100%', alignItems: 'center' }}>
+        <Txt size={62} weight="900" color={C.white} style={{ textShadowColor: 'rgba(40,25,20,0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }}>{mm}:{ss}</Txt>
+        <Txt size={14} weight="900" color={C.white} upper style={{ marginTop: 2, textShadowColor: 'rgba(40,25,20,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 }}>{t('keep_focus')}</Txt>
       </View>
 
       {!done && (
-        <Pressable onPress={giveUp} style={{ position: 'absolute', bottom: 28, alignSelf: 'center', backgroundColor: C.hudBg, borderRadius: R.pill, paddingHorizontal: 32, paddingVertical: 12 }}>
-          <Txt size={16} color={C.hudFg}>{t('give_up')}</Txt>
-        </Pressable>
+        <View style={{ position: 'absolute', bottom: 26, alignSelf: 'center' }}>
+          <Btn label={t('give_up')} kind="danger" size="md" onPress={giveUp} style={{ width: 240 }} />
+        </View>
       )}
 
       {done && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,16,28,0.6)', alignItems: 'center', justifyContent: 'center' }}>
-          <View style={{ backgroundColor: C.card, borderRadius: R.lg, padding: 28, alignItems: 'center', width: 360 }}>
-            <Txt size={26} color={C.ink} center>{done.wonderUp ? t('wonder_done') : '✨'}</Txt>
-            <Txt size={17} color={C.greenDk} center style={{ marginTop: 6 }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,16,28,0.55)', alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ backgroundColor: C.card, borderRadius: R.xl, borderWidth: STROKE, borderColor: C.maroon, padding: 28, alignItems: 'center', width: 360 }}>
+            <Txt size={26} weight="900" color={C.ink} center>{done.wonderUp ? t('wonder_done') : '✨'}</Txt>
+            <Txt size={17} weight="900" color={C.greenDk} center style={{ marginTop: 6 }}>
               {done.wonderUp ? `${t('now_building')}: ${useStore.getState().lang === 'ar' ? WONDERS[done.wonderIdx].ar : WONDERS[done.wonderIdx].en}` : `+${num(done.drops)} 💧`}
             </Txt>
-            <Txt size={14} color={C.mute} center style={{ marginTop: 8 }}>{quote(useStore.getState().sessionsTotal)}</Txt>
-            <Pressable onPress={() => router.back()} style={{ marginTop: 18, backgroundColor: C.greenDk, borderRadius: R.pill, paddingHorizontal: 40, paddingVertical: 14 }}>
-              <Txt size={18} color="#FFFBF2">{t('next')}</Txt>
-            </Pressable>
+            <Txt size={14} weight="700" color={C.mute} center style={{ marginTop: 8 }}>{quote(useStore.getState().sessionsTotal)}</Txt>
+            <Btn label={t('next')} kind="primary" size="md" onPress={() => router.back()} style={{ marginTop: 18, width: 200 }} />
           </View>
         </View>
       )}
