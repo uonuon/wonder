@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Companion } from '@/components/Companion';
 import { Btn, Txt } from '@/components/ui';
 import { t } from '@/lib/i18n';
+import { scheduleDailyReminder } from '@/lib/notifications';
 import { useStore } from '@/lib/store';
 import { C, R } from '@/lib/theme';
 
@@ -20,6 +21,8 @@ export default function Onboarding() {
     if (step < 2) setStep(step + 1);
     else {
       set({ builderName: name.trim() || (lang === 'ar' ? 'بنّاء' : 'Builder'), dailyGoalMin: goal, onboarded: true });
+      // ask for notification permission at this natural moment; revert the pref if denied
+      scheduleDailyReminder().then((ok) => { if (!ok) set({ notificationsOn: false }); });
       router.replace('/home');
     }
   }

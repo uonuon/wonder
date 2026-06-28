@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { syncReminder } from '@/lib/notifications';
 import { useStore } from '@/lib/store';
 import { C } from '@/lib/theme';
 
@@ -19,14 +20,17 @@ export default function RootLayout() {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
     // follow the device language on first launch (MENA-first) — only after persisted state has
     // rehydrated, so a returning user's saved choice is never overwritten
-    const applyLocale = () => {
+    const onHydrated = () => {
       try {
         const code = getLocales()[0]?.languageCode ?? 'en';
         initLocale(code === 'ar' ? 'ar' : 'en');
       } catch {}
+      // re-assert the daily reminder for returning users (no permission prompt at launch)
+      const s = useStore.getState();
+      if (s.onboarded) syncReminder(s.notificationsOn);
     };
-    if (useStore.persist.hasHydrated()) applyLocale();
-    else return useStore.persist.onFinishHydration(applyLocale);
+    if (useStore.persist.hasHydrated()) onHydrated();
+    else return useStore.persist.onFinishHydration(onHydrated);
   }, [initLocale]);
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync().catch(() => {});

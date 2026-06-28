@@ -65,6 +65,9 @@ const S: Record<string, Pair> = {
   version: ['Version', 'الإصدار'],
   on: ['On', 'تشغيل'],
   off: ['Off', 'إيقاف'],
+  // notifications
+  notif_title: ['Your wonder is waiting 🏛️', 'أثرك في انتظارك 🏛️'],
+  notif_body: ['Take a focus session and lay a few more stones today.', 'خُذ جلسة تركيز وضَع بعض الأحجار اليوم.'],
   // plus
   plus_title: ['Tarkeez+', 'تركيز+'],
   plus_tag: ['Build faster. Unlock more.', 'ابنِ أسرع. افتح المزيد.'],

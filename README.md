@@ -169,12 +169,19 @@ Focus was kept on the **core**: intro/onboarding, companion animation, the build
 calculations, and the focus loop. These are stubbed/cosmetic and ready to wire up later:
 
 - **RevenueCat / IAP** — `paywall.tsx` + `subscribePlus()` are UI-only (no real billing).
-- **Push notifications** — `expo-notifications` is installed but no reminders are scheduled yet.
 - **Store submission** (App Store / Play) — needs your developer accounts + signing.
 
+**Local notifications ARE wired** (`src/lib/notifications.ts`): a daily focus reminder
+(8 PM, bilingual) scheduled via `expo-notifications`. Permission is requested at the end of
+onboarding (and from the Settings toggle), re-asserted on launch without prompting, and is a
+no-op on web. Only **remote push** is not set up. Note: like the rest of the app this needs a
+**dev build** to fire (Expo Go can't run SDK 56).
+
 ### Suggested next steps on Mac
-1. Build a dev client (`npx expo run:ios`) and run a real start-to-finish session.
-2. Schedule local notifications: a daily focus reminder + a session-complete nudge.
+1. Build a dev client (`npx expo run:ios`) and run a real start-to-finish session + confirm the
+   daily reminder fires.
+2. (Optional) Make the reminder time user-configurable (currently fixed at 20:00 in
+   `notifications.ts`).
 3. (Optional) Author a `.riv` companion in the Rive editor and drop it into `Companion.tsx`.
 4. Wire RevenueCat for Tarkeez+ when you're ready to monetize.
 5. Add ambient audio (`expo-av` is installed).

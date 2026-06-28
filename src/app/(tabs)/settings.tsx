@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, Icon, Txt } from '@/components/ui';
 import { img } from '@/lib/assets';
 import { t } from '@/lib/i18n';
+import { cancelDailyReminder, scheduleDailyReminder } from '@/lib/notifications';
 import { useStore } from '@/lib/store';
 import { C, R } from '@/lib/theme';
 
@@ -12,6 +13,19 @@ export default function Settings() {
   const router = useRouter();
   const s = useStore();
   const [armed, setArmed] = useState(false);
+
+  // Toggle notifications: enabling schedules the daily reminder and reverts if the OS
+  // denies permission, so the switch never lies about its state.
+  async function toggleNotifications() {
+    if (s.notificationsOn) {
+      s.set({ notificationsOn: false });
+      await cancelDailyReminder();
+    } else {
+      s.set({ notificationsOn: true });
+      const ok = await scheduleDailyReminder();
+      if (!ok) s.set({ notificationsOn: false });
+    }
+  }
 
   function row(icon: string, label: string, right: React.ReactNode) {
     return (
@@ -35,7 +49,7 @@ export default function Settings() {
         <Txt size={28} color={C.ink} style={{ marginBottom: 14 }}>{t('nav_settings')}</Txt>
 
         {row('🔊', t('sound'), toggle(s.soundOn, () => s.set({ soundOn: !s.soundOn })))}
-        {row('🔔', t('notifications'), toggle(s.notificationsOn, () => s.set({ notificationsOn: !s.notificationsOn })))}
+        {row('🔔', t('notifications'), toggle(s.notificationsOn, toggleNotifications))}
         {row('📳', t('haptics'), toggle(s.hapticsOn, () => s.set({ hapticsOn: !s.hapticsOn })))}
         {row('🌐', t('language'), (
           <View style={{ flexDirection: 'row', gap: 8 }}>
