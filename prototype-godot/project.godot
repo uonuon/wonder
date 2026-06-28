@@ -1,0 +1,31 @@
+; Tarkeez - focus/productivity app (Godot 4)
+
+config_version=5
+
+[application]
+
+config/name="Tarkeez"
+config/description="Focus and grow a desert oasis. An Arabic-first focus companion."
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.7")
+config/icon="res://assets/icons/icon.png"
+
+[autoload]
+
+AppState="*res://AppState.gd"
+Loc="*res://Loc.gd"
+Audio="*res://Audio.gd"
+Notify="*res://Notify.gd"
+
+[display]
+
+window/size/viewport_width=540
+window/size/viewport_height=960
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/handheld/orientation="sensor"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=1
+textures/vram_compression/import_etc2_astc=true
